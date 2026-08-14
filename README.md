@@ -1,21 +1,21 @@
 # Predicción de impago crediticio
 
 Modelo de clasificación que estima la probabilidad de que un cliente de tarjeta de
-crédito caiga en impago, con **análisis del umbral de decisión en términos de costo
-de negocio**.
+crédito caiga en impago, y que además calcula qué umbral de decisión conviene usar
+según lo que cuesta cada tipo de error.
 
 Dataset: [Default of Credit Card Clients](https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients)
-(UCI) — 30,000 clientes reales de Taiwán, abril–septiembre 2005.
+(UCI), 30,000 clientes reales de Taiwán, abril a septiembre de 2005.
 
 ---
 
 ## El problema con la mayoría de los modelos de crédito
 
-El 22.1% de los clientes cae en impago. Un modelo que prediga **"nadie cae en
-impago"** —sin detectar un solo caso— alcanza **77.9% de exactitud**.
+El 22.1% de los clientes cae en impago. Eso significa que un modelo que prediga
+"nadie cae en impago", sin detectar un solo caso, alcanza 77.9% de exactitud.
 
-Por eso este proyecto no reporta accuracy como métrica principal. Reporta AUC-PR,
-recall y, sobre todo, **el costo esperado en unidades de negocio**.
+Por eso aquí no reporto accuracy como métrica principal, sino AUC-PR, recall y el
+costo esperado en unidades de negocio.
 
 ```
 Modelo trivial ("nadie cae en impago"):
@@ -28,25 +28,26 @@ Modelo trivial ("nadie cae en impago"):
 
 ## Resultado principal
 
-El umbral de decisión por defecto (0.5) **no es el óptimo**. Los dos errores no
-cuestan lo mismo: aprobar a alguien que no paga cuesta el saldo expuesto; rechazar
-a alguien que sí habría pagado cuesta solo el margen.
+El umbral de decisión por defecto (0.5) no es el óptimo. Los dos errores no cuestan
+lo mismo: aprobar a alguien que no paga cuesta el saldo expuesto, mientras que
+rechazar a alguien que sí habría pagado cuesta solo el margen.
 
 Con una razón de costos conservadora de 1:5:
 
 | Umbral | Costo total | Recall | Precisión |
 |---|---|---|---|
 | 0.50 (por defecto) | 5,548 | 0.369 | 0.662 |
-| **0.18 (óptimo)** | **4,122** | **0.715** | 0.403 |
+| 0.18 (óptimo) | 4,122 | 0.715 | 0.403 |
 
-**Mover el umbral reduce el costo 25.7%** y casi duplica la detección de impagos
-(de 37% a 71%), a cambio de más rechazos preventivos.
+Mover el umbral reduce el costo 25.7% y casi duplica la detección de impagos, de
+37% a 71%, a cambio de más rechazos preventivos.
 
 ![Costo vs umbral](reports/figures/costo_vs_umbral.png)
 
 ### ¿Y si el supuesto de costos está mal?
 
-La razón 1:5 es un supuesto. El análisis de sensibilidad lo varía de 1:2 a 1:20:
+La razón 1:5 es un supuesto mío, no un dato. El análisis de sensibilidad la varía
+de 1:2 a 1:20:
 
 | Razón de costos | Umbral óptimo | Recall | Precisión | Ahorro vs 0.5 |
 |---|---|---|---|---|
@@ -56,9 +57,8 @@ La razón 1:5 es un supuesto. El análisis de sensibilidad lo varía de 1:2 a 1:
 | 1:10 | 0.08 | 0.952 | 0.263 | 51.6% |
 | 1:20 | 0.07 | 0.972 | 0.252 | 73.1% |
 
-**La conclusión es robusta:** en todo el rango evaluado el umbral óptimo está por
-debajo de 0.5 y el ahorro es positivo. Lo que cambia es la magnitud, no la
-dirección.
+En todo el rango evaluado el umbral óptimo queda por debajo de 0.5 y el ahorro sigue
+siendo positivo. Lo que cambia es cuánto se ahorra, no si conviene mover el umbral.
 
 ---
 
@@ -66,17 +66,17 @@ dirección.
 
 | Modelo | AUC-PR | ROC-AUC | Recall | Precisión | Exactitud |
 |---|---|---|---|---|---|
-| **Gradient Boosting** | **0.563** | 0.782 | 0.369 | 0.662 | 0.819 |
+| Gradient Boosting | 0.563 | 0.782 | 0.369 | 0.662 | 0.819 |
 | Random Forest | 0.560 | 0.780 | 0.603 | 0.487 | 0.772 |
 | Árbol de decisión | 0.533 | 0.765 | 0.623 | 0.454 | 0.751 |
 | Regresión logística | 0.504 | 0.754 | 0.610 | 0.439 | 0.741 |
 
 ![Comparación](reports/figures/comparacion_modelos.png)
 
-**Nota sobre la lectura:** Gradient Boosting gana en AUC-PR pero tiene el recall más
-bajo al umbral 0.5 — precisamente porque ese umbral es inadecuado. Al reoptimizarlo
-su recall sube a 0.715. Es la razón por la que comparar modelos solo al umbral por
-defecto lleva a conclusiones equivocadas.
+Gradient Boosting gana en AUC-PR pero tiene el recall más bajo al umbral 0.5. No es
+un defecto del modelo: ese umbral simplemente no le sirve. Al reoptimizarlo su recall
+sube a 0.715. Por eso comparar modelos solo al umbral por defecto lleva a
+conclusiones equivocadas.
 
 ![Curva PR](reports/figures/curvas_precision_recall.png)
 
@@ -86,45 +86,46 @@ defecto lleva a conclusiones equivocadas.
 
 ![Importancia](reports/figures/importancia_variables.png)
 
-| Variable | Importancia |
-|---|---|
-| `atraso_sep` — estatus de pago del mes más reciente | 0.508 |
-| `meses_con_atraso` — cuántos de 6 meses tuvo atraso | 0.121 |
-| `atraso_maximo` | 0.076 |
-| `atraso_promedio` | 0.044 |
-| `utilizacion_maxima` — % del límite usado | 0.031 |
+| Variable | Qué mide | Importancia |
+|---|---|---|
+| `atraso_sep` | Estatus de pago del mes más reciente | 0.508 |
+| `meses_con_atraso` | Cuántos de los 6 meses tuvo atraso | 0.121 |
+| `atraso_maximo` | Peor atraso del periodo | 0.076 |
+| `atraso_promedio` | Atraso promedio | 0.044 |
+| `utilizacion_maxima` | Porcentaje máximo del límite usado | 0.031 |
 
-El comportamiento de pago reciente domina: `atraso_sep` sola explica la mitad de la
-señal. Las variables demográficas (sexo, educación, estado civil) aparecen muy
-abajo, lo cual es deseable — un modelo que decidiera crédito por sexo o edad sería
-un problema regulatorio, no solo estadístico.
+El comportamiento de pago reciente domina: `atraso_sep` por sí sola explica la mitad
+de la señal. Sexo, educación y estado civil quedan muy abajo, y eso me parece bien.
+Un modelo que decidiera a quién darle crédito según su sexo tendría un problema
+regulatorio, no solo estadístico.
 
 ---
 
 ## Decisiones metodológicas
 
-**Métrica principal: AUC-PR, no ROC-AUC ni accuracy.** Con 22% de positivos, la
-curva precision-recall describe mejor el desempeño sobre la clase minoritaria. La
-ROC puede verse bien mientras el modelo falla en lo que importa.
+Uso AUC-PR como métrica principal, no ROC-AUC ni accuracy. Con 22% de positivos, la
+curva precision-recall describe mucho mejor qué tan bien va el modelo sobre la clase
+que importa. La ROC puede verse decente mientras el modelo falla justo en los casos
+que quieres atrapar.
 
-**Categorías no documentadas → "otro", no eliminadas.** El paper original documenta
-`EDUCATION` 1–4 y `MARRIAGE` 1–3, pero los datos traen ceros y valores extra sin
-significado declarado. Son ~1.5% de los registros; borrarlos introduciría sesgo de
-selección.
+Las categorías no documentadas van a "otro" en lugar de eliminarse. El paper original
+define `EDUCATION` de 1 a 4 y `MARRIAGE` de 1 a 3, pero los datos traen ceros y
+valores extra que nadie explica. Son alrededor del 1.5% de los registros y borrarlos
+metería sesgo de selección.
 
-**La escala de atraso no es lineal.** Los valores −2, −1 y 0 significan "sin
-consumo", "pago total" y "crédito revolvente"; solo ≥1 es atraso real. Se conserva
-el valor original y se deriva una variable de atraso efectivo.
+La escala de atraso no es lineal, aunque lo parezca. Los valores −2, −1 y 0 significan
+"sin consumo", "pago total" y "crédito revolvente". Solo de 1 en adelante hay atraso
+real. Conservo el valor original y derivo aparte una variable de atraso efectivo.
 
-**Preprocesamiento dentro del Pipeline.** El escalado y la imputación se ajustan
-solo con los datos de entrenamiento en cada fold. Ajustarlos antes de separar
-train/test filtraría información del test e inflaría las métricas.
+El escalado y la imputación van dentro del Pipeline de sklearn, no antes. Si los
+ajustara sobre el dataset completo antes de separar train y test, información del
+test se filtraría al modelo y las métricas saldrían infladas.
 
-**`class_weight="balanced"`.** Sin esto los modelos aprenden a predecir "paga" casi
-siempre, porque el 78% de los casos lo son.
+Todos los modelos usan `class_weight="balanced"`. Sin eso aprenden a predecir "paga"
+casi siempre, porque el 78% de los casos lo son.
 
-**Validación cruzada estratificada de 5 folds** sobre el conjunto de entrenamiento;
-el de prueba (25%) se toca una sola vez, al final.
+La validación cruzada es estratificada de 5 folds sobre el conjunto de entrenamiento.
+El de prueba, 25% de los datos, lo toco una sola vez al final.
 
 ---
 
@@ -194,12 +195,15 @@ Python · scikit-learn · Pandas · NumPy · Matplotlib · pytest
 
 ## Limitaciones
 
-- Los datos son de Taiwán, 2005. Los patrones no trasladan directo al mercado
-  mexicano actual; la metodología sí.
-- La razón de costos 1:5 es un supuesto razonable, no un dato de la institución.
-  El análisis de sensibilidad acota su efecto.
-- No se evaluó equidad del modelo entre grupos demográficos (*fairness*). Es el
-  siguiente paso natural antes de cualquier uso real.
+Los datos son de Taiwán en 2005, así que los patrones concretos no se trasladan al
+mercado mexicano de hoy. La metodología sí.
+
+La razón de costos 1:5 la elegí yo. Es un supuesto razonable para tarjetas de
+crédito, pero ninguna institución me dio ese número. Por eso incluí el análisis de
+sensibilidad.
+
+Falta evaluar si el modelo trata distinto a unos grupos demográficos que a otros.
+Es lo que haría antes de proponerlo para cualquier uso real.
 
 ## Fuente
 
