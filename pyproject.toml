@@ -1,0 +1,16 @@
+[project]
+name = "riesgo-credito-ml"
+version = "0.1.0"
+description = "Modelo de predicción de impago crediticio con análisis de costos de negocio"
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

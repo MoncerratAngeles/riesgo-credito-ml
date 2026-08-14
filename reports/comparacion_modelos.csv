@@ -1,0 +1,5 @@
+modelo,auc_pr,roc_auc,recall,precision,f1,exactitud,umbral_optimo,costo_optimo,ahorro_vs_05_pct
+gradient_boosting,0.5633,0.7822,0.3689,0.6616,0.4737,0.8187,0.1766,4122.0,25.7
+random_forest,0.5603,0.7799,0.6028,0.4871,0.5388,0.7717,0.353,4179.0,3.89
+arbol_decision,0.5333,0.7653,0.6227,0.4539,0.525,0.7508,0.4118,4338.0,0.8
+regresion_logistica,0.5036,0.7541,0.61,0.4385,0.5102,0.7409,0.402,4372.0,3.51
