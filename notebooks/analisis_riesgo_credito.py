@@ -1,7 +1,7 @@
-"""Genera el notebook de analisis exploratorio.
+"""Genera el notebook de análisis exploratorio.
 
-Se construye por script para que el .ipynb sea reproducible y no dependa
-de la sesion interactiva. Ejecutar:
+Se construye mediante un script para que el .ipynb sea reproducible y no dependa
+de la sesión interactiva. Ejecutar:
 
     python notebooks/analisis_riesgo_credito.py
 """
@@ -38,7 +38,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from riesgo import config, datos, modelos, evaluacion, viz
+from riesgo import config, datos, modelos, evaluación, viz
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 pd.set_option("display.max_columns", 50)
@@ -61,7 +61,7 @@ print("  exactitud: {:.2f}%".format((1 - objetivo.mean()) * 100))
 print("  impagos no detectados: {:,}".format(int(objetivo.sum())))"""))
 
 c.append(nbf.v4.new_markdown_cell("""\
-Ese 77.9% de exactitud sin detectar nada es la razón por la que **accuracy no sirve
+Ese 77.9% de exactitud, sin detectar nada, es la razón por la que **accuracy no sirve
 como métrica** en este problema. Cualquier modelo debe compararse contra esa línea
 base, no contra el 50% que uno intuye."""))
 
@@ -151,8 +151,8 @@ tabla = evaluacion.comparar_modelos(entrenados, X_te, y_te)
 tabla"""))
 
 c.append(nbf.v4.new_markdown_cell("""\
-Gradient Boosting gana en AUC-PR, pero **tiene el recall más bajo al umbral 0.5**.
-Eso no es un defecto del modelo: es que el umbral 0.5 es inadecuado para este
+Gradient Boosting gana en AUC-PR, pero **tiene el recall más bajo en el umbral de 0.5**.
+Eso no es un defecto del modelo: el umbral de 0.5 es inadecuado para este
 problema. Lo corregimos abajo."""))
 
 c.append(nbf.v4.new_markdown_cell("""\
@@ -219,7 +219,7 @@ el sexo del solicitante sería un problema regulatorio, no solo estadístico."""
 c.append(nbf.v4.new_markdown_cell("""\
 ## Conclusiones
 
-1. **Accuracy es engañosa aquí.** Predecir "nadie cae en impago" da 77.9% sin
+1. **La precisión es engañosa aquí.** Predecir "nadie cae en impago" da un 77.9% sin
    detectar un solo caso.
 
 2. **El umbral 0.5 no es óptimo.** Moverlo a 0.18 reduce el costo esperado 25.7% y
