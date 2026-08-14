@@ -1,16 +1,12 @@
-"""Evaluacion orientada a negocio.
+"""Metricas y analisis de costos.
 
-La idea central del proyecto: en credito, accuracy es una metrica enganosa
-y el umbral 0.5 es arbitrario.
+En credito la accuracy enganya. Con 22% de impagos, un modelo que prediga
+"todos pagan" saca 78% sin detectar uno solo. Por eso aqui se reporta
+recall, precision y AUC-PR, ademas del costo esperado.
 
-Con 22% de impagos, un modelo que prediga "todos pagan" alcanza 78% de
-accuracy sin detectar un solo impago. Por eso aqui se reporta recall,
-precision y AUC-PR, y sobre todo el COSTO esperado en pesos.
-
-El umbral de decision no se fija en 0.5 por costumbre: se elige el que
-minimiza el costo total, dado que un falso negativo (prestarle a quien no
-paga) cuesta varias veces mas que un falso positivo (rechazar a quien si
-habria pagado).
+El umbral tampoco se deja en 0.5. Se busca el que minimiza el costo total,
+porque un falso negativo (prestarle a quien no paga) sale varias veces mas
+caro que un falso positivo (rechazar a quien si habria pagado).
 """
 
 import logging
@@ -57,8 +53,8 @@ def metricas(y_true, y_pred, y_proba=None):
 def linea_base_trivial(y_true):
     """El modelo tonto: predice que nadie cae en impago.
 
-    Se reporta explicitamente porque es la referencia honesta. Cualquier
-    modelo que no supere esto en recall no aporta nada.
+    Va explicito en el reporte porque es la referencia honesta. Un modelo
+    que no le gane en recall no esta aportando nada.
     """
     y_pred = np.zeros(len(y_true), dtype=int)
     return {
@@ -126,8 +122,8 @@ def umbral_optimo(y_true, y_proba, costo_fn=None, costo_fp=None):
 def sensibilidad_costos(y_true, y_proba, razones=(2, 3, 5, 10, 20)):
     """Como cambia el umbral optimo segun la razon de costos supuesta.
 
-    Responde a la critica obvia: "la razon 1:5 es un supuesto". Si el
-    umbral optimo se mueve poco entre 1:2 y 1:20, la conclusion es robusta.
+    La razon 1:5 es un supuesto, y alguien lo va a cuestionar con razon.
+    Si el umbral se mueve poco entre 1:2 y 1:20, la conclusion aguanta.
     """
     filas = []
     for r in razones:

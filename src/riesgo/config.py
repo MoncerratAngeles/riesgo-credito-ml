@@ -68,14 +68,15 @@ ESTADO_CIVIL_MAPA = {
 SEXO_MAPA = {1: "hombre", 2: "mujer"}
 
 # --- Costos de negocio ---------------------------------------------------
-# El punto central del proyecto: los dos errores NO cuestan lo mismo.
+# Los dos errores no cuestan lo mismo.
 #
-# Falso negativo (predecimos que paga, pero cae en impago):
-#   se pierde el saldo expuesto. Es el error caro.
-# Falso positivo (predecimos impago, pero si habria pagado):
-#   se pierde el margen de ese cliente y su relacion comercial.
+# Falso negativo (predecimos que paga y cae en impago): se pierde el saldo
+#   expuesto. Es el error caro.
+# Falso positivo (predecimos impago y si habria pagado): se pierde el margen
+#   de ese cliente y la relacion comercial.
 #
-# La razon 1:5 es un supuesto conservador para la industria de tarjetas.
-# El analisis de sensibilidad en el notebook la varia de 1:2 a 1:20.
+# La razon 1:5 es un supuesto conservador para tarjetas de credito. El
+# analisis de sensibilidad la varia de 1:2 a 1:20 para ver si la conclusion
+# aguanta.
 COSTO_FALSO_NEGATIVO = 5.0
 COSTO_FALSO_POSITIVO = 1.0

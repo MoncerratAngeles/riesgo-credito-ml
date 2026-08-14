@@ -1,8 +1,9 @@
 """Figuras del analisis.
 
-Paleta validada para daltonismo (peor separacion adyacente DeltaE 9.1 en
-OKLab, umbral 8). Toda figura que use color lleva ademas leyenda o
-etiqueta directa: el color nunca es el unico canal de informacion.
+Revise que la paleta funcione para daltonismo: los colores que quedan
+juntos se distinguen al simular deuteranopia, protanopia y tritanopia.
+Aun asi todas las figuras llevan leyenda o etiqueta directa, para que el
+color no sea lo unico que separa una serie de otra.
 """
 
 import logging
@@ -18,13 +19,13 @@ from . import config
 
 log = logging.getLogger(__name__)
 
-AZUL = "#2a78d6"
-NARANJA = "#eb6834"
+VIOLETA = "#4a3aa7"
 AQUA = "#1baf7a"
 AMARILLO = "#eda100"
 MAGENTA = "#e87ba4"
+VERDE = "#008300"
 ROJO = "#e34948"
-PALETA = [AZUL, NARANJA, AQUA, AMARILLO, MAGENTA]
+PALETA = [VIOLETA, AQUA, AMARILLO, MAGENTA, VERDE]
 
 INK = "#0b0b0b"
 INK_SEC = "#52514e"
@@ -69,7 +70,7 @@ def distribucion_objetivo(y):
     conteo = y.value_counts().sort_index()
     pcts = conteo / conteo.sum() * 100
     barras = ax.bar(["Paga", "Impago"], conteo.values,
-                    color=[AZUL, NARANJA], width=0.55,
+                    color=[VIOLETA, MAGENTA], width=0.55,
                     edgecolor=SURFACE, linewidth=2)
 
     for b, n, p in zip(barras, conteo.values, pcts.values):
@@ -136,14 +137,14 @@ def curvas_roc(modelos, X_test, y_test):
 
 
 def costo_vs_umbral(barrido, umbral_opt):
-    """La figura clave: donde esta el umbral que minimiza el costo."""
+    """Costo total por umbral, con recall y precision debajo para contexto."""
     _estilo()
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 7), sharex=True,
                                    gridspec_kw={"height_ratios": [1.4, 1]})
 
-    ax1.plot(barrido["umbral"], barrido["costo"], color=AZUL, linewidth=2.2)
+    ax1.plot(barrido["umbral"], barrido["costo"], color=VIOLETA, linewidth=2.2)
     fila = barrido.loc[barrido["costo"].idxmin()]
-    ax1.scatter([fila["umbral"]], [fila["costo"]], s=90, color=NARANJA,
+    ax1.scatter([fila["umbral"]], [fila["costo"]], s=90, color=MAGENTA,
                 edgecolor=SURFACE, linewidth=2, zorder=5)
     ax1.annotate("Optimo: {:.2f}\ncosto {:,.0f}".format(fila["umbral"], fila["costo"]),
                  xy=(fila["umbral"], fila["costo"]),
@@ -162,9 +163,9 @@ def costo_vs_umbral(barrido, umbral_opt):
 
     ax2.plot(barrido["umbral"], barrido["recall"], color=AQUA,
              linewidth=2, label="Recall")
-    ax2.plot(barrido["umbral"], barrido["precision"], color=MAGENTA,
+    ax2.plot(barrido["umbral"], barrido["precision"], color=AMARILLO,
              linewidth=2, label="Precision")
-    ax2.axvline(fila["umbral"], color=NARANJA, linestyle="--", linewidth=1.5)
+    ax2.axvline(fila["umbral"], color=MAGENTA, linestyle="--", linewidth=1.5)
     ax2.set_xlabel("Umbral de decision")
     ax2.set_ylabel("Metrica")
     ax2.legend(frameon=False, fontsize=9, labelcolor=INK_SEC)
@@ -181,7 +182,7 @@ def matriz_confusion(y_true, y_pred, titulo="Matriz de confusion"):
     cm = confusion_matrix(y_true, y_pred)
 
     fig, ax = plt.subplots(figsize=(6, 5))
-    ax.imshow(cm, cmap="Blues", alpha=0.85)
+    ax.imshow(cm, cmap="Purples", alpha=0.85)
 
     etiquetas = [
         ["Correcto\n(paga y paga)", "Falso positivo\n(rechazo innecesario)"],
@@ -213,7 +214,7 @@ def importancia(df_imp, titulo="Variables mas predictivas"):
     d = df_imp.sort_values(col)
 
     fig, ax = plt.subplots(figsize=(8, max(4, 0.32 * len(d))))
-    ax.barh(d["variable"], d[col], color=AZUL, height=0.68,
+    ax.barh(d["variable"], d[col], color=VIOLETA, height=0.68,
             edgecolor=SURFACE, linewidth=1.5)
 
     for y, v in zip(range(len(d)), d[col].values):
@@ -238,9 +239,9 @@ def comparacion_modelos(tabla):
     x = np.arange(len(tabla))
     ancho = 0.38
     ax.bar(x - ancho / 2, tabla["auc_pr"], ancho, label="AUC-PR",
-           color=AZUL, edgecolor=SURFACE, linewidth=1.5)
+           color=VIOLETA, edgecolor=SURFACE, linewidth=1.5)
     ax.bar(x + ancho / 2, tabla["recall"], ancho, label="Recall",
-           color=NARANJA, edgecolor=SURFACE, linewidth=1.5)
+           color=MAGENTA, edgecolor=SURFACE, linewidth=1.5)
 
     for i, (a, r) in enumerate(zip(tabla["auc_pr"], tabla["recall"])):
         ax.annotate("{:.3f}".format(a), xy=(i - ancho / 2, a), xytext=(0, 4),

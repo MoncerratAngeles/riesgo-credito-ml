@@ -1,10 +1,10 @@
 """Definicion y entrenamiento de modelos.
 
-Todo modelo se envuelve en un Pipeline de scikit-learn que incluye el
-preprocesamiento. Esto no es cosmetico: garantiza que el escalado y la
-imputacion se ajusten SOLO con los datos de entrenamiento en cada fold de
-la validacion cruzada. Ajustarlos antes de separar train/test filtraria
-informacion del test al modelo y las metricas saldrian infladas.
+Cada modelo va envuelto en un Pipeline de scikit-learn junto con su
+preprocesamiento. Asi el escalado y la imputacion se ajustan solo con los
+datos de entrenamiento de cada fold. Si se ajustaran antes de separar
+train y test, informacion del test se filtraria al modelo y las metricas
+saldrian infladas.
 """
 
 import logging
@@ -51,9 +51,9 @@ def construir_preprocesador(X):
 def catalogo(X):
     """Los modelos a comparar, cada uno con su preprocesamiento.
 
-    class_weight="balanced" penaliza mas el error sobre la clase minoritaria
-    (los impagos). Sin eso, los modelos aprenden a predecir "paga" casi
-    siempre, porque el 78% de los casos lo son.
+    class_weight="balanced" castiga mas fuerte los errores sobre la clase
+    minoritaria. Sin eso los modelos acaban prediciendo "paga" casi
+    siempre, que es lo que hace el 78% de los clientes.
     """
     pre = lambda: construir_preprocesador(X)
 
@@ -102,9 +102,9 @@ def separar_train_test(X, y):
 def validacion_cruzada(modelo, X, y, folds=5):
     """Validacion cruzada estratificada.
 
-    Se reporta average_precision (area bajo la curva precision-recall) como
-    metrica principal, no accuracy ni ROC-AUC. Con 22% de positivos, la
-    curva PR describe mucho mejor el desempeno sobre la clase que importa.
+    La metrica principal es average_precision (area bajo la curva
+    precision-recall), no accuracy ni ROC-AUC. Con 22% de positivos, la
+    curva PR describe mucho mejor como le va sobre la clase que importa.
     """
     cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=config.SEMILLA)
     res = cross_validate(

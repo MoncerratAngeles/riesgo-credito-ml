@@ -1,19 +1,18 @@
 """Descarga, limpieza y preparacion del dataset de riesgo crediticio.
 
-Decisiones documentadas:
+Tres cosas que vale la pena saber antes de leer el codigo:
 
-1. Categorias no documentadas (EDUCATION 0/5/6, MARRIAGE 0). El paper
-   original no las define. Se agrupan en "otro" en lugar de eliminarse:
-   son ~1.5% de los registros y borrarlos introduciria sesgo de seleccion.
+1. EDUCATION 0/5/6 y MARRIAGE 0 aparecen en los datos pero el paper
+   original no los define. Los agrupo en "otro" en vez de borrarlos. Son
+   como 1.5% de los registros y eliminarlos meteria sesgo de seleccion.
 
-2. La variable de atraso tiene una escala rara. Los valores -2, -1 y 0
-   significan "sin consumo", "pago total" y "uso de credito revolvente";
-   1 en adelante son meses de atraso. Se conserva el valor original y se
-   deriva una bandera booleana de atraso real (>= 1).
+2. La escala de atraso enganya. Los valores -2, -1 y 0 significan "sin
+   consumo", "pago total" y "credito revolvente". Solo de 1 en adelante
+   hay atraso real. Conservo el valor original y derivo aparte la bandera
+   de atraso efectivo.
 
-3. Sin escalado en este modulo. El escalado se hace dentro del Pipeline
-   de scikit-learn, ajustado solo con el conjunto de entrenamiento, para
-   no filtrar informacion del test.
+3. Aqui no se escala nada. Eso pasa dentro del Pipeline de scikit-learn,
+   ajustado solo con entrenamiento, para no filtrar el test.
 """
 
 import io
@@ -97,10 +96,10 @@ def limpiar(df):
 def agregar_features(df):
     """Deriva variables de comportamiento de pago.
 
-    Estas son las que aportan senal real: el historial crudo mes a mes
-    dice poco por si solo, pero el patron agregado (cuantos meses de
-    atraso, si esta empeorando, que proporcion de su limite usa) es lo
-    que un analista de riesgo mira primero.
+    El historial crudo mes a mes dice poco por si solo. Lo que sirve es el
+    patron agregado: cuantos meses lleva atrasado, si va empeorando, que
+    tanto de su limite esta usando. Es lo primero que revisaria un
+    analista de riesgo a mano.
     """
     out = df.copy()
 
